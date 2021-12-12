@@ -89,7 +89,7 @@ DGifOpenFileHandle(int FileHandle, int *Error)
     GifFile->SavedImages = NULL;
     GifFile->SColorMap = NULL;
 
-    Private = (GifFilePrivateType *)calloc(1, sizeof(GifFilePrivateType));
+    Private = (GifFilePrivateType *)malloc(sizeof(GifFilePrivateType));
     if (Private == NULL) {
         if (Error != NULL)
 	    *Error = D_GIF_ERR_NOT_ENOUGH_MEM;
@@ -97,9 +97,6 @@ DGifOpenFileHandle(int FileHandle, int *Error)
         free((char *)GifFile);
         return NULL;
     }
-
-    /*@i1@*/memset(Private, '\0', sizeof(GifFilePrivateType));
-
 #ifdef _WIN32
     _setmode(FileHandle, O_BINARY);    /* Make sure it is in binary mode. */
 #endif /* _WIN32 */
@@ -175,14 +172,13 @@ DGifOpen(void *userData, InputFunc readFunc, int *Error)
     GifFile->SavedImages = NULL;
     GifFile->SColorMap = NULL;
 
-    Private = (GifFilePrivateType *)calloc(1, sizeof(GifFilePrivateType));
+    Private = (GifFilePrivateType *)malloc(sizeof(GifFilePrivateType));
     if (!Private) {
         if (Error != NULL)
 	    *Error = D_GIF_ERR_NOT_ENOUGH_MEM;
         free((char *)GifFile);
         return NULL;
     }
-    /*@i1@*/memset(Private, '\0', sizeof(GifFilePrivateType));
 
     GifFile->Private = (void *)Private;
     Private->FileHandle = 0;
@@ -253,28 +249,29 @@ DGifGetScreenDesc(GifFileType *GifFile)
 
     if (READ(GifFile, Buf, 3) != 3) {
         GifFile->Error = D_GIF_ERR_READ_FAILED;
-	GifFreeMapObject(GifFile->SColorMap);
-	GifFile->SColorMap = NULL;
+        GifFreeMapObject(GifFile->SColorMap);
+        GifFile->SColorMap = NULL;
         return GIF_ERROR;
     }
+
     GifFile->SColorResolution = (((Buf[0] & 0x70) + 1) >> 4) + 1;
     SortFlag = (Buf[0] & 0x08) != 0;
     BitsPerPixel = (Buf[0] & 0x07) + 1;
     GifFile->SBackGroundColor = Buf[1];
-    GifFile->AspectByte = Buf[2]; 
-    if (Buf[0] & 0x80) {    /* Do we have global color map? */
-	int i;
+    GifFile->AspectByte = Buf[2];
 
+    if (Buf[0] & 0x80) {    /* Do we have global color map? */
+        int i;
         GifFile->SColorMap = GifMakeMapObject(1 << BitsPerPixel, NULL);
+
         if (GifFile->SColorMap == NULL) {
             GifFile->Error = D_GIF_ERR_NOT_ENOUGH_MEM;
             return GIF_ERROR;
         }
-
         /* Get the global color map: */
-	GifFile->SColorMap->SortFlag = SortFlag;
+        GifFile->SColorMap->SortFlag = SortFlag;
         for (i = 0; i < GifFile->SColorMap->ColorCount; i++) {
-	    /* coverity[check_return] */
+        /* coverity[check_return] */
             if (READ(GifFile, Buf, 3) != 3) {
                 GifFreeMapObject(GifFile->SColorMap);
                 GifFile->SColorMap = NULL;
@@ -396,8 +393,8 @@ DGifGetImageDesc(GifFileType *GifFile)
 
     if (GifFile->SavedImages) {
         SavedImage* new_saved_images =
-            (SavedImage *)reallocarray(GifFile->SavedImages,
-                            (GifFile->ImageCount + 1), sizeof(SavedImage));
+            (SavedImage *)realloc(GifFile->SavedImages,
+                            sizeof(SavedImage) * (GifFile->ImageCount + 1));
         if (new_saved_images == NULL) {
             GifFile->Error = D_GIF_ERR_NOT_ENOUGH_MEM;
             return GIF_ERROR;
@@ -767,12 +764,6 @@ DGifSetupDecompress(GifFileType *GifFile)
     }
     BitsPerPixel = CodeSize;
 
-    /* this can only happen on a severely malformed GIF */
-    if (BitsPerPixel > 8) {
-	GifFile->Error = D_GIF_ERR_READ_FAILED;	/* somewhat bogus error code */
-	return GIF_ERROR;    /* Failed to read Code size. */
-    }
-
     Private->Buf[0] = 0;    /* Input Buffer empty. */
     Private->BitsPerPixel = BitsPerPixel;
     Private->ClearCode = (1 << BitsPerPixel);
@@ -1108,7 +1099,7 @@ DGifSlurp(GifFileType *GifFile)
               if (ImageSize > (SIZE_MAX / sizeof(GifPixelType))) {
                   return GIF_ERROR;
               }
-              sp->RasterBits = (unsigned char *)reallocarray(NULL, ImageSize,
+              sp->RasterBits = (unsigned char *)malloc(ImageSize *
                       sizeof(GifPixelType));
 
               if (sp->RasterBits == NULL) {
@@ -1179,12 +1170,6 @@ DGifSlurp(GifFileType *GifFile)
               break;
         }
     } while (RecordType != TERMINATE_RECORD_TYPE);
-
-    /* Sanity check for corrupted file */
-    if (GifFile->ImageCount == 0) {
-	GifFile->Error = D_GIF_ERR_NO_IMAG_DSCR;
-	return(GIF_ERROR);
-    }
 
     return (GIF_OK);
 }
