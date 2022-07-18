@@ -169,6 +169,14 @@ int EGifPutCode(GifFileType *GifFile, int GifCodeSize,
 int EGifPutCodeNext(GifFileType *GifFile,
                     const GifByteType *GifCodeBlock);
 
+// add for libAGifEncoder
+int EGifPutExtensionFirst(GifFileType * GifFile, int GifExtCode,
+                          int GifExtLen, const void *GifExtension);
+int EGifPutExtensionNext(GifFileType * GifFile, int GifExtCode,
+                         int GifExtLen, const void *GifExtension);
+int EGifPutExtensionLast(GifFileType * GifFile, int GifExtCode,
+                         int GifExtLen, const void *GifExtension);
+
 /******************************************************************************
  GIF decoding routines
 ******************************************************************************/
@@ -217,7 +225,7 @@ int GifQuantizeBuffer(unsigned int Width, unsigned int Height,
                    int *ColorMapSize, GifByteType * RedInput,
                    GifByteType * GreenInput, GifByteType * BlueInput,
                    GifByteType * OutputBuffer,
-                   GifColorType * OutputColorMap);
+                   GifColorType * OutputColorMap, int *Error);
 
 /******************************************************************************
  Error handling and reporting.

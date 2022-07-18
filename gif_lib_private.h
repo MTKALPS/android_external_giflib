@@ -10,6 +10,7 @@ gif_lib_private.h - internal giflib routines and structures
 #include "gif_lib.h"
 #include "gif_hash.h"
 
+#define PROGRAM_NAME "GIFLIB"
 #define EXTENSION_INTRODUCER      0x21
 #define DESCRIPTOR_INTRODUCER     0x2c
 #define TERMINATOR_INTRODUCER     0x3b

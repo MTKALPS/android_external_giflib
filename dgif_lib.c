@@ -1133,7 +1133,8 @@ DGifSlurp(GifFileType *GifFile)
           case EXTENSION_RECORD_TYPE:
               if (DGifGetExtension(GifFile,&ExtFunction,&ExtData) == GIF_ERROR)
                   return (GIF_ERROR);
-	      /* Create an extension block with our data */
+              /*Create an extension block with our data */
+	      /// M: add for the comment extension with 0 length of content in gif. @{
               if (ExtData != NULL) {
 	          if (GifAddExtensionBlock(&GifFile->ExtensionBlockCount,
 				       &GifFile->ExtensionBlocks, 

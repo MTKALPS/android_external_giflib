@@ -6,7 +6,10 @@ LOCAL_SDK_VERSION := 9
 LOCAL_SRC_FILES := \
 	dgif_lib.c \
 	gifalloc.c \
-	gif_err.c
+	gif_err.c \
+	egif_lib.c \
+	gif_hash.c \
+	quantize.c
 
 LOCAL_CFLAGS += -Wno-format -DHAVE_CONFIG_H
 LOCAL_SDK_VERSION := 8
